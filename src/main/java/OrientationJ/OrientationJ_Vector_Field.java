@@ -58,7 +58,7 @@ public class OrientationJ_Vector_Field implements PlugIn {
 	}
 
 	public void run(String arg) {
-		if (Macro.getOptions() == null) {
+		if (Macro.getOptions() == null && arg.equals("")) {
 			AnalysisDialog orientation = new AnalysisDialog(OrientationService.VECTORFIELD);
 			orientation.showDialog();
 		} else {
