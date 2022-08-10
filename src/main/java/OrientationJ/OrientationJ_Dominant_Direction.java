@@ -36,7 +36,8 @@
 // are based on it.
 //
 //=============================================================================================================
-
+package OrientationJ;
+import java.text.DecimalFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +45,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
+import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import orientation.Gradient;
@@ -52,11 +54,11 @@ import orientation.LogMute;
 import orientation.OrientationParameters;
 import orientation.OrientationService;
 
-public class OrientationJ_Horizontal_Alignment implements PlugIn {
+public class OrientationJ_Dominant_Direction implements PlugIn {
 
 	public static void main(String arg[]) {
 		new OrientationJ_Test_Stack_Image_Small().run("");
-		new OrientationJ_Horizontal_Alignment().run("");
+		new OrientationJ_Dominant_Direction().run("");
 	}
 
 	public void run(String arg) {
@@ -75,33 +77,28 @@ public class OrientationJ_Horizontal_Alignment implements PlugIn {
 		}
 		ImageStack stack = imp.getStack();
 		int nt = stack.getSize();
-		double data[][] = new double[nt][3];
-		for (int i=0; i<nt; i++) {
-			imp.setSlice(i+1);
-			double res[] = computeSpline(imp.getProcessor());
-			data[i][0] = i;
-			data[i][1] = res[0];
-			data[i][2] = res[1];
+		IJ.log("Frame, Orientation [Degrees], Coherency [%]");
+		String formats[] = {"#0.00", "#0.0000", "#0.00000"};
+		ResultsTable table = new ResultsTable();
+		int slice = imp.getSlice();
+		for (int i=1; i<=nt; i++) {
+			table.incrementCounter();
+			imp.setSlice(i);
+			ImageProcessor ip = imp.getProcessor().crop();
+			ip.crop();
+			double res[] = computeSpline(ip);
+			String s1 = (new DecimalFormat(formats[0])).format(i);
+			String s2 = (new DecimalFormat(formats[1])).format(res[0]);
+			String s3 = (new DecimalFormat(formats[2])).format(res[1]);
+			table.addValue("Slice", i);
+			table.addValue("Orientation [Degrees]", res[0]);
+			table.addValue("Coherency [%]", res[1]);
+			IJ.log(s1 + ", " + s2 + ", " + s3);
 		}
-		int nx = imp.getWidth();
-		int ny = imp.getHeight();
-		int diag = (int)Math.ceil(Math.sqrt(nx*nx+ny*ny));
-		
-		ImageStack rotate = new ImageStack(diag, diag);
-		
-		for (int i=0; i<nt; i++) {
-			imp.setSlice(i+1); 
-			ImageProcessor ip1 = imp.getProcessor();
-			ImageProcessor ip2 = ip1.createProcessor(diag, diag);
-			ip2.insert(ip1, diag/2-nx/2, diag/2-ny/2);
-			ip2.setInterpolate(true);
-			ip2.rotate((data[i][1]));
-			IJ.run("Rotate... ", "angle=15 grid=3 interpolation=Bicubic enlarge");
-			rotate.addSlice("" + data[i][1], ip2);
-		}
-		(new ImagePlus("Horizontal Alignement of " + imp.getTitle(), rotate)).show();
+		table.show("Dominant Direction of " + imp.getTitle());
+		imp.setSlice(slice);
 	}
-
+	
 	public double[] computeSpline(ImageProcessor ip) {
 		LogMute log = new LogMute();
 		OrientationParameters params = new OrientationParameters(OrientationService.DOMINANTDIRECTION);

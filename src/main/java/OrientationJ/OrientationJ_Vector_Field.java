@@ -37,7 +37,7 @@
 //
 //=============================================================================================================
 
-
+package OrientationJ;
 
 import gui_orientation.AnalysisDialog;
 import gui_orientation.WalkBarOrientationJ;

@@ -36,7 +36,7 @@
 // are based on it.
 //
 //=============================================================================================================
-
+package OrientationJ;
 import gui_orientation.AnalysisDialog;
 import gui_orientation.WalkBarOrientationJ;
 import ij.Macro;
@@ -48,20 +48,20 @@ import orientation.OrientationResults;
 import orientation.OrientationService;
 import orientation.imageware.ImageWare;
 
-public class OrientationJ_Analysis implements PlugIn {
+public class OrientationJ_Distribution implements PlugIn {
 
 	public static void main(String arg[]) {
 		new OrientationJ_Test_Stack_Image_Small().run("");
-		new OrientationJ_Analysis().run("");
+		new OrientationJ_Distribution().run("");
 	}
-	
+
 	public void run(String arg) {
 		if (Macro.getOptions() == null) {
-			AnalysisDialog orientation = new AnalysisDialog(OrientationService.ANALYSIS);
+			AnalysisDialog orientation = new AnalysisDialog(OrientationService.DISTRIBUTION);
 			orientation.showDialog();
 		}
 		else {
-			OrientationParameters params = new OrientationParameters(OrientationService.ANALYSIS);
+			OrientationParameters params = new OrientationParameters(OrientationService.DISTRIBUTION);
 			params.getMacroParameters(Macro.getOptions());
 			ImageWare source = GroupImage.getCurrentImage();
 			if (source == null) {
@@ -71,6 +71,8 @@ public class OrientationJ_Analysis implements PlugIn {
 			OrientationProcess process = new OrientationProcess(walk, source, params);
 			process.run();
 			OrientationResults.show(process.getGroupImage(), params, 1);
+			OrientationResults.plotDistribution(process.getGroupImage(), params, 1);
+			OrientationResults.tableDistribution(process.getGroupImage(), params, 1);
 		}
 	}
 }

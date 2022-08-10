@@ -36,43 +36,40 @@
 // are based on it.
 //
 //=============================================================================================================
- 
-import gui_orientation.AnalysisDialog;
-import gui_orientation.WalkBarOrientationJ;
-import ij.Macro;
+package OrientationJ;
+import ij.ImagePlus;
+import ij.ImageStack;
 import ij.plugin.PlugIn;
-import orientation.GroupImage;
-import orientation.OrientationParameters;
-import orientation.OrientationProcess;
-import orientation.OrientationResults;
-import orientation.OrientationService;
-import orientation.imageware.ImageWare;
+import ij.process.FloatProcessor;
+import orientation.TestImage;
 
-public class OrientationJ_Distribution implements PlugIn {
+public class OrientationJ_Test_Stack_Image_Small implements PlugIn {
 
 	public static void main(String arg[]) {
 		new OrientationJ_Test_Stack_Image_Small().run("");
-		new OrientationJ_Distribution().run("");
 	}
 
 	public void run(String arg) {
-		if (Macro.getOptions() == null) {
-			AnalysisDialog orientation = new AnalysisDialog(OrientationService.DISTRIBUTION);
-			orientation.showDialog();
+		int nx = 256;
+		int ny = 256;
+		int nt = 4;
+		ImageStack stack = new ImageStack(nx, ny);
+		for(int k=0; k<nt; k++) {
+			FloatProcessor c = TestImage.chirp(nx, ny);
+			FloatProcessor w = TestImage.wave(nx, ny, k*Math.PI/nt, 0.1);
+			FloatProcessor fp = add(c, w);
+			stack.addSlice("", fp);
 		}
-		else {
-			OrientationParameters params = new OrientationParameters(OrientationService.DISTRIBUTION);
-			params.getMacroParameters(Macro.getOptions());
-			ImageWare source = GroupImage.getCurrentImage();
-			if (source == null) {
-				return;
-			}
-			WalkBarOrientationJ walk = new WalkBarOrientationJ();
-			OrientationProcess process = new OrientationProcess(walk, source, params);
-			process.run();
-			OrientationResults.show(process.getGroupImage(), params, 1);
-			OrientationResults.plotDistribution(process.getGroupImage(), params, 1);
-			OrientationResults.tableDistribution(process.getGroupImage(), params, 1);
-		}
+		new ImagePlus("Test Stack", stack).show();
+	}
+	
+	private FloatProcessor add(FloatProcessor fp1, FloatProcessor fp2) {
+		int ny = Math.min(fp1.getHeight(), fp2.getHeight());
+		int nx = Math.min(fp1.getWidth(), fp2.getWidth());
+		FloatProcessor fp  = new FloatProcessor(nx, ny);
+		for(int i=0; i<nx; i++)
+		for(int j=0; j<ny; j++)
+			fp.putPixelValue(i, j, (fp1.getPixelValue(i, j) + fp2.getPixelValue(i, j)));
+		return fp;
 	}
 }

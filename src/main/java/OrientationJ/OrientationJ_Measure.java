@@ -36,39 +36,43 @@
 // are based on it.
 //
 //=============================================================================================================
- 
-import gui_orientation.AnalysisDialog;
-import gui_orientation.WalkBarOrientationJ;
+package OrientationJ;
+import gui_orientation.MeasureDialog;
+import ij.IJ;
+import ij.ImagePlus;
 import ij.Macro;
+import ij.WindowManager;
 import ij.plugin.PlugIn;
-import orientation.GroupImage;
-import orientation.OrientationParameters;
-import orientation.OrientationProcess;
-import orientation.OrientationService;
-import orientation.imageware.ImageWare;
 
-public class OrientationJ_Clustering implements PlugIn {
+public class OrientationJ_Measure implements PlugIn {
 
 	public static void main(String arg[]) {
 		new OrientationJ_Test_Stack_Image_Small().run("");
-		new OrientationJ_Clustering().run("");
+		new OrientationJ_Measure().run("");
 	}
 
 	public void run(String arg) {
+	
+		ImagePlus imp = WindowManager.getCurrentImage();
+		if (imp == null) {
+			IJ.noImage();
+			return;
+		}
+		
+		if (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16 && imp.getType() != ImagePlus.GRAY32) {
+			IJ.error("Only process 8-bits, 16 bits or 32 bits image.");
+			return;
+		}
+		
 		if (Macro.getOptions() == null) {
-			AnalysisDialog orientation = new AnalysisDialog(OrientationService.CLUSTERING);
-			orientation.showDialog();
+			MeasureDialog dialog = new MeasureDialog(imp, false, 0.0);
+			dialog.showDialog();
 		}
 		else {
-			OrientationParameters params = new OrientationParameters(OrientationService.CLUSTERING);
-			params.getMacroParameters(Macro.getOptions());
-			ImageWare source = GroupImage.getCurrentImage();
-			if (source == null) {
-				return;
-			}
-			WalkBarOrientationJ walk = new WalkBarOrientationJ();
-			OrientationProcess process = new OrientationProcess(walk, source, params);
-			process.run();
+			String options = Macro.getOptions();
+			double sigma = Double.parseDouble(Macro.getValue(options, "sigma", "0.0"));
+			MeasureDialog dialog = new MeasureDialog(imp, true, sigma);
+			dialog.run();	
 		}
 	}
 }

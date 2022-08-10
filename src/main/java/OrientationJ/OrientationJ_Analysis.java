@@ -36,18 +36,43 @@
 // are based on it.
 //
 //=============================================================================================================
- 
-import ij.ImagePlus;
-import ij.plugin.PlugIn;
-import orientation.TestImage;
 
-public class OrientationJ_Test_Chirp_Image_Large implements PlugIn {
+package OrientationJ;
+
+import gui_orientation.AnalysisDialog;
+import gui_orientation.WalkBarOrientationJ;
+import ij.Macro;
+import ij.plugin.PlugIn;
+import orientation.GroupImage;
+import orientation.OrientationParameters;
+import orientation.OrientationProcess;
+import orientation.OrientationResults;
+import orientation.OrientationService;
+import orientation.imageware.ImageWare;
+
+public class OrientationJ_Analysis implements PlugIn {
 
 	public static void main(String arg[]) {
-		new OrientationJ_Test_Chirp_Image_Large().run("");
+		new OrientationJ_Test_Stack_Image_Small().run("");
+		new OrientationJ_Analysis().run("");
 	}
-
+	
 	public void run(String arg) {
-		new ImagePlus("Chirp", TestImage.chirp(1024, 1024)).show();
+		if (Macro.getOptions() == null) {
+			AnalysisDialog orientation = new AnalysisDialog(OrientationService.ANALYSIS);
+			orientation.showDialog();
+		}
+		else {
+			OrientationParameters params = new OrientationParameters(OrientationService.ANALYSIS);
+			params.getMacroParameters(Macro.getOptions());
+			ImageWare source = GroupImage.getCurrentImage();
+			if (source == null) {
+				return;
+			}
+			WalkBarOrientationJ walk = new WalkBarOrientationJ();
+			OrientationProcess process = new OrientationProcess(walk, source, params);
+			process.run();
+			OrientationResults.show(process.getGroupImage(), params, 1);
+		}
 	}
 }

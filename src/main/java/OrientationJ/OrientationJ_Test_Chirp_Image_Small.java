@@ -36,43 +36,18 @@
 // are based on it.
 //
 //=============================================================================================================
-
-import gui_orientation.AnalysisDialog;
-import gui_orientation.WalkBarOrientationJ;
-import ij.Macro;
+package OrientationJ;
+import ij.ImagePlus;
 import ij.plugin.PlugIn;
-import orientation.GroupImage;
-import orientation.OrientationParameters;
-import orientation.OrientationProcess;
-import orientation.OrientationResults;
-import orientation.OrientationService;
-import orientation.imageware.ImageWare;
+import orientation.TestImage;
 
-public class OrientationJ_Corner_Harris implements PlugIn {
+public class OrientationJ_Test_Chirp_Image_Small implements PlugIn {
 
 	public static void main(String arg[]) {
-		new OrientationJ_Test_Stack_Image_Small().run("");
-		new OrientationJ_Corner_Harris().run("");
+		new OrientationJ_Test_Chirp_Image_Small().run("");
 	}
 
 	public void run(String arg) {
-		
-		if (Macro.getOptions() == null) {
-			AnalysisDialog orientation = new AnalysisDialog(OrientationService.HARRIS);
-			orientation.showDialog();
-		}
-		else {
-			OrientationParameters params = new OrientationParameters(OrientationService.HARRIS);
-			params.getMacroParameters(Macro.getOptions());
-			ImageWare source = GroupImage.getCurrentImage();
-			if (source == null) {
-				return;
-			}
-			WalkBarOrientationJ walk = new WalkBarOrientationJ();
-			OrientationProcess process = new OrientationProcess(walk, source, params);
-			process.run();
-			OrientationResults.show(process.getGroupImage(), params, 1);
-		}
+		new ImagePlus("Chirp", TestImage.chirp(256, 256)).show();
 	}
-	
 }

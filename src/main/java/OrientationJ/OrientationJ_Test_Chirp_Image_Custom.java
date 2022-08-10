@@ -36,18 +36,27 @@
 // are based on it.
 //
 //=============================================================================================================
- 
+package OrientationJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import orientation.TestImage;
 
-public class OrientationJ_Test_Chirp_Image_Small implements PlugIn {
+public class OrientationJ_Test_Chirp_Image_Custom implements PlugIn {
 
 	public static void main(String arg[]) {
-		new OrientationJ_Test_Chirp_Image_Small().run("");
+		new OrientationJ_Test_Chirp_Image_Custom().run("");
 	}
 
 	public void run(String arg) {
-		new ImagePlus("Chirp", TestImage.chirp(256, 256)).show();
+		GenericDialog dlg = new GenericDialog("Test Chirp Image");
+		dlg.addNumericField("Width", 512, 0);
+		dlg.addNumericField("Height", 512, 0);
+		dlg.showDialog();
+		if (dlg.wasCanceled())
+			return;
+		int nx = (int)dlg.getNextNumber();
+		int ny = (int)dlg.getNextNumber();
+		new ImagePlus("Chirp", TestImage.chirp(nx, ny)).show();
 	}
 }

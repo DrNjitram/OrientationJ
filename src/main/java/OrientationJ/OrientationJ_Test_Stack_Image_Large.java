@@ -36,7 +36,7 @@
 // are based on it.
 //
 //=============================================================================================================
- 
+package OrientationJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.PlugIn;
